@@ -1,0 +1,187 @@
+package cinema
+
+import jdk.jfr.Percentage
+
+fun main() {
+    enterRows()
+    enterSeats()
+    mainMenu()
+}
+
+val row0 = mutableListOf(' ')
+val cinema = mutableListOf(row0)
+val oneRow = mutableListOf<Char>()
+
+var row = 0
+var seat = 0
+var rows = 0
+var seats = 0
+var totalSeats = 0
+var purchasedTickets = 0
+
+var ticketPrice = 0
+var currentIncome = 0
+var totalSum = 0
+
+var percentage = 0.0
+var formatPercentage = "%.2f".format(percentage)
+
+fun enterRows() {
+    println("Enter the number of rows:")
+    val enterRows = readln()
+    try {
+        rows = enterRows.toInt()
+        if (rows !in 1..9) {
+            println("Number of rows can be within 1 to 9")
+            enterRows()
+            return
+        }
+    } catch (e: NumberFormatException) {
+        println("This is not the number")
+        enterRows()
+        return
+    }
+}
+
+fun enterSeats() {
+    println("Enter the number of seats in each row:")
+    val enterSeats = readln()
+    try {
+        seats = enterSeats.toInt()
+        if (seats !in 1..9) {
+            println("Number of seats can be within 1 to 9")
+            enterSeats()
+            return
+        }
+    } catch (e: NumberFormatException) {
+        println("This is not the number")
+        enterSeats()
+        return
+    }
+    var count = 0
+    for (i in 1..seats) {
+        count = i
+        row0.add(count.toString().first())
+    }
+    for (i in 0..seats) {
+        oneRow += 'S'
+    }
+    for (i in 1..rows) {
+        cinema.add(oneRow.toMutableList())
+        cinema[i][0] = i.toString().first()
+    }
+    totalSeats = rows * seats
+}
+
+fun mainMenu() {
+    println()
+    print("""
+        1. Show the seats
+        2. Buy a ticket
+        3. Statistics
+        0. Exit
+    """.trimIndent())
+    println()
+    val menu = readln()
+    when (menu) {
+        "1" -> {
+            printHall()
+        }
+        "2" -> {
+            chooseSeat()
+        }
+        "3" -> {
+            statistiks()
+        }
+        "0" -> {
+            return
+        }
+        else -> {
+            println("Incorrect input")
+            mainMenu()
+            return
+        }
+    }
+}
+
+fun statistiks() {
+    println()
+    println("Number of purchased tickets: $purchasedTickets")
+    println("Percentage: $formatPercentage%")
+    println("Current income: \$$currentIncome")
+    println("Total income: \$${totalSumOfTickets()}")
+    mainMenu()
+}
+
+fun printHall() {
+    println()
+    println("Cinema:")
+    for (i in 0..cinema.lastIndex) {
+        println(cinema[i].joinToString(" "))
+    }
+    mainMenu()
+}
+
+fun chooseSeat() {
+    println()
+    println("Enter a row number:")
+    val yourRow = readln()
+    try {
+        row = yourRow.toInt()
+    } catch (e: Exception) {
+        println("\nWrong input!")
+    }
+    println("Enter a seat number in that row:")
+    val yourSeat = readln()
+    try {
+        seat = yourSeat.toInt()
+    } catch (e: Exception) {
+        println("\nWrong input!")
+        chooseSeat()
+        return
+    }
+    if (row !in 1..rows || seat !in 1..seats) {
+        println("\nWrong input!")
+        row = 0
+        seat = 0
+        chooseSeat()
+        return
+    }
+    if (cinema[row][seat] == 'B') {
+        println("\nThat ticket has already been purchased!")
+        row = 0
+        seat = 0
+        chooseSeat()
+        return
+    }
+    println()
+    yourTicketPrice()
+    cinema[row][seat] = 'B'
+    purchasedTickets++
+    percentage = purchasedTickets.toDouble() / totalSeats * 100
+    formatPercentage = "%.2f".format(percentage)
+    currentIncome += ticketPrice
+    ticketPrice = 0
+    row = 0
+    seat = 0
+    mainMenu()
+}
+
+fun totalSumOfTickets(): Int {
+    totalSum = if (rows * seats <= 60) {
+        rows * seats * 10
+    } else {
+        (rows / 2) * seats * 10 + (rows - rows / 2) * seats * 8
+    }
+    return totalSum
+}
+
+fun yourTicketPrice() {
+    ticketPrice = if (rows * seats <= 60) {
+        10
+    } else if (row <= rows / 2) {
+        10
+    } else { 8 }
+
+    println("Ticket price: \$$ticketPrice")
+}
